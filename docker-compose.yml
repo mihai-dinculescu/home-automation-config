@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  server:
+    build: ./server
+    container_name: home-automation-config-server
+    depends_on:
+      - storage
+    environment:
+      - HOST=0.0.0.0
+      - PORT=80
+      - POSTGRES_DB_HOST=storage
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - API_KEY=${API_KEY}
+    ports:
+      - ${PORT}:80
+    labels:
+      - "docker.group=config"
+  storage:
+    image: postgres:12.2
+    container_name: home-automation-config-storage
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - storage-postgresql:/var/lib/postgresql/data
+    labels:
+      - "docker.group=config"
+
+volumes:
+  storage-postgresql:
+    external:
+      name: home-automation-config-storage
