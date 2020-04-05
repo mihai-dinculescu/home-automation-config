@@ -1,23 +1,26 @@
 extern crate dotenv;
-#[macro_use] extern crate diesel;
-#[macro_use] extern crate serde;
+#[macro_use]
+extern crate diesel;
+#[macro_use]
+extern crate serde;
 
 use std::io;
 
-use dotenv::dotenv;
-use actix_web::{middleware, web, App,  HttpServer};
+use actix_cors::Cors;
+use actix_web::{middleware, web, App, HttpServer};
 use diesel_migrations::run_pending_migrations;
+use dotenv::dotenv;
 
 mod db;
+mod handlers;
+mod models;
 mod schema;
 mod schema_graphql;
-mod models;
-mod handlers;
 
 use crate::db::establish_connection;
-use crate::schema_graphql::create_schema;
+use crate::handlers::graphql::{graphql, playground};
 use crate::models::key::Key;
-use crate::handlers::graphql::{playground, graphql};
+use crate::schema_graphql::create_schema;
 
 #[actix_rt::main]
 async fn main() -> io::Result<()> {
@@ -41,11 +44,13 @@ async fn main() -> io::Result<()> {
 
     // run pending migrations
     let connection = db_pool.get().unwrap();
-    run_pending_migrations(&connection).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+    run_pending_migrations(&connection)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
 
     // start http server
     HttpServer::new(move || {
         App::new()
+            .wrap(Cors::new().finish()) // allow all requests
             .data(db_pool.clone())
             .data(schema.clone())
             .data(key.clone())
