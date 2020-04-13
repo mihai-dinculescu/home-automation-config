@@ -4,9 +4,10 @@ Config API for [home-automation-thermostat](https://github.com/mihai-dinculescu/
 Based on [rust-graphql-actix-juniper-diesel-example](https://github.com/mihai-dinculescu/rust-graphql-actix-juniper-diesel-example).
 
 # Setup
+## Rust & Cargo
 Install `rust` and `cargo` via `rustup` (https://rustup.rs/). The stable version is OK.
 
-Diesel CLI
+## Diesel CLI
 ```
 cargo install diesel_cli --no-default-features --features postgres
 ```
@@ -14,6 +15,12 @@ cargo install diesel_cli --no-default-features --features postgres
 Optional: Cargo Watch (not required, but it speeds up development greatly)
 ```
 cargo install cargo-watch
+```
+
+## Databases
+```
+CREATE DATABASE config;
+CREATE DATABASE config_test;
 ```
 
 # Run locally
@@ -28,6 +35,11 @@ cargo watch -x run
 ```
 
 Open http://localhost:8080/playground.
+
+# Run Integration tests
+```
+cargo test
+```
 
 # Run in Docker
 ```
