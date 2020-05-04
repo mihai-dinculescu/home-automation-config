@@ -1,5 +1,5 @@
 # Overview
-Config API for [home-automation-thermostat](https://github.com/mihai-dinculescu/home-automation-thermostat).
+Config API for [home-automation-thermostat](https://github.com/mihai-dinculescu/home-automation-thermostat). It interactions with [home-automation-monitoring](https://github.com/mihai-dinculescu/home-automation-monitoring).
 
 Based on [rust-graphql-actix-juniper-diesel-example](https://github.com/mihai-dinculescu/rust-graphql-actix-juniper-diesel-example).
 
