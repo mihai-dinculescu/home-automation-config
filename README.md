@@ -7,25 +7,25 @@ Based on [rust-graphql-actix-juniper-diesel-example](https://github.com/mihai-di
 ## Rust & Cargo
 Install `rust` and `cargo` via `rustup` (https://rustup.rs/). The stable version is OK.
 
-## Diesel CLI
-```
-cargo install diesel_cli --no-default-features --features postgres
-```
-
 Optional: Cargo Watch (not required, but it speeds up development greatly)
 ```
 cargo install cargo-watch
 ```
 
+## Diesel CLI
+```
+cargo install diesel_cli --no-default-features --features postgres
+```
+
 ## Databases
 ```
-CREATE DATABASE config;
-CREATE DATABASE config_test;
+createdb -U postgres config
+createdb -U postgres config_test
 ```
 
 # Run locally
 Access to a postgres instance is required.
-
+`
 ```
 cargo run
 ```
