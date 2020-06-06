@@ -2,7 +2,7 @@ FROM rust:slim-buster
 
 RUN apt-get update && \
     apt-get -y upgrade && \
-    apt-get -y install libpq-dev
+    apt-get -y install libpq-dev libssl-dev pkg-config
 
 WORKDIR /app
 COPY ["Cargo.toml", "Cargo.lock", "diesel.toml", "/app/"]
