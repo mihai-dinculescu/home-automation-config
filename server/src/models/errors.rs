@@ -10,7 +10,6 @@ pub struct GraphQLError {
     pub locations: Vec<GraphQlErrorLocation>,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GraphQLErrors {
     pub errors: Vec<GraphQLError>,
@@ -18,6 +17,11 @@ pub struct GraphQLErrors {
 
 impl GraphQLErrors {
     pub fn new(message: &str) -> GraphQLErrors {
-        GraphQLErrors { errors: vec![ GraphQLError { message: message.to_owned(), locations: Vec::new() } ] }
+        GraphQLErrors {
+            errors: vec![GraphQLError {
+                message: message.to_owned(),
+                locations: Vec::new(),
+            }],
+        }
     }
 }

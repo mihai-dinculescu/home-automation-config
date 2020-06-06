@@ -5,8 +5,9 @@ use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 use diesel_migrations::run_pending_migrations;
 use dotenv::dotenv;
 
-use ::lib::db::{establish_connection, DatabaseKind};
+use ::lib::db;
 use ::lib::handlers::graphql::{graphql, playground};
+use ::lib::influxdb;
 use ::lib::models::key::Key;
 use ::lib::schema_graphql::create_schema;
 
@@ -28,7 +29,10 @@ async fn main() -> io::Result<()> {
     let schema = std::sync::Arc::new(create_schema());
 
     // database connection pool
-    let db_pool = establish_connection(DatabaseKind::Config);
+    let db_pool = db::establish_connection(db::DatabaseKind::Config);
+
+    // influxdb connection pool
+    let influxdb_pool = influxdb::establish_connection();
 
     // run pending migrations
     let connection = db_pool.get().unwrap();
@@ -42,6 +46,7 @@ async fn main() -> io::Result<()> {
         App::new()
             .wrap(Cors::new().finish()) // allow all requests
             .data(db_pool.clone())
+            .data(influxdb_pool.clone())
             .data(schema.clone())
             .data(key.clone())
             .wrap(middleware::Logger::default())

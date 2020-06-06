@@ -42,6 +42,21 @@ cargo test
 ```
 
 # Run in Docker
+The following environment variables are required in an `.env` file:
+
+```
+PORT=
+POSTGRES_DB=
+POSTGRES_DB_TEST=
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+INFLUXDB_HOST=
+INFLUXDB_DB=
+INFLUXDB_USERNAME=
+INFLUXDB_PASSWORD=
+API_KEY=
+```
+
 ```
 docker volume create --name=home-automation-config-storage
 docker-compose up

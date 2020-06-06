@@ -1,3 +1,4 @@
-pub mod thermostat_status;
 pub mod errors;
 pub mod key;
+pub mod thermostat_command;
+pub mod thermostat_status;

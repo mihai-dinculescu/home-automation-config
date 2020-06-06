@@ -7,8 +7,9 @@ use actix_web::{test, web, App};
 use diesel_migrations::{revert_latest_migration, run_pending_migrations};
 use dotenv::dotenv;
 
-use lib::db::{establish_connection, DatabaseKind};
+use lib::db;
 use lib::handlers::graphql::graphql;
+use lib::influxdb;
 use lib::models::key::Key;
 use lib::schema_graphql::create_schema;
 
@@ -24,7 +25,10 @@ pub async fn create_app(
     let schema = std::sync::Arc::new(create_schema());
 
     // database connection pool
-    let db_pool = establish_connection(DatabaseKind::ConfigTest);
+    let db_pool = db::establish_connection(db::DatabaseKind::ConfigTest);
+
+    // influxdb connection pool
+    let influxdb_pool = influxdb::establish_connection();
 
     // get connection
     let connection = db_pool.get().unwrap();
@@ -41,6 +45,7 @@ pub async fn create_app(
     test::init_service(
         App::new()
             .data(db_pool.clone())
+            .data(influxdb_pool.clone())
             .data(schema.clone())
             .data(key.clone())
             .service(

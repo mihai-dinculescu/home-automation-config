@@ -7,6 +7,7 @@ use juniper::http::{playground::playground_source, GraphQLRequest};
 use juniper::serde::ser::Error as SerdeError;
 
 use crate::db::DbPool;
+use crate::influxdb::InfluxDbPool;
 use crate::models::errors::GraphQLErrors;
 use crate::models::key::Key;
 use crate::schema_graphql::{create_context, SchemaGraphQL};
@@ -23,7 +24,8 @@ pub async fn graphql(
     st: web::Data<Arc<SchemaGraphQL>>,
     data_query: Option<web::Query<GraphQLRequest>>,
     data_body: Option<web::Json<GraphQLRequest>>,
-    pool: web::Data<DbPool>,
+    db_pool: web::Data<DbPool>,
+    influxdb_pool: web::Data<InfluxDbPool>,
     key: web::Data<Key>,
 ) -> Result<HttpResponse, Error> {
     let headers = req.headers();
@@ -46,11 +48,14 @@ pub async fn graphql(
     }
 
     let body = web::block(move || {
-        let db_pool = pool
+        let db_pool = db_pool
+            .get()
+            .map_err(|e| serde_json::error::Error::custom(e))?;
+        let influxdb_pool = influxdb_pool
             .get()
             .map_err(|e| serde_json::error::Error::custom(e))?;
 
-        let ctx = create_context(db_pool);
+        let ctx = create_context(db_pool, influxdb_pool);
         let res = data.execute(&st, &ctx);
 
         Ok::<_, serde_json::error::Error>(serde_json::to_string(&res)?)
