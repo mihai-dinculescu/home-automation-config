@@ -16,6 +16,22 @@ jobs:
       run:
         working-directory: server
 
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: config_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions-rs/toolchain@v1
         with:
