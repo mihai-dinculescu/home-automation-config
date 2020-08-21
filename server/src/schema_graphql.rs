@@ -26,7 +26,7 @@ impl QueryRoot {
         let connection: &PgConnection = &context.db;
 
         let result = ThermostatStatus::get_latest(connection)?;
-        return Ok(result);
+        Ok(result)
     }
 
     #[graphql(description = "Query the thermostat status history")]
@@ -34,7 +34,7 @@ impl QueryRoot {
         let connection: &PgConnection = &context.db;
 
         let results = ThermostatStatus::get_history(connection)?;
-        return Ok(results);
+        Ok(results)
     }
 
     #[graphql(description = "Get the next command that should be executed by the thermostat")]
@@ -45,7 +45,7 @@ impl QueryRoot {
         let connection = &context.influxdb;
 
         let result = ThermostatCommand::get_next_command(connection, data)?;
-        return Ok(result);
+        Ok(result)
     }
 }
 
@@ -63,7 +63,7 @@ impl MutationRoot {
         ThermostatStatus::insert(connection, data)?;
 
         let result = ThermostatStatus::get_latest(connection)?;
-        return Ok(result);
+        Ok(result)
     }
 }
 

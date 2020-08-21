@@ -25,12 +25,12 @@ pub fn establish_connection() -> InfluxDbPool {
 
     let info = AuthInfo {
         url: influxdb_host.clone(),
-        database: influxdb_db.clone(),
-        username: influxdb_username.clone(),
-        password: influxdb_password.clone(),
+        database: influxdb_db,
+        username: influxdb_username,
+        password: influxdb_password,
     };
 
-    init_pool(info).expect(&format!("Error connecting to {}", influxdb_host))
+    init_pool(info).unwrap_or_else(|_| panic!("Error connecting to {}", influxdb_host))
 }
 
 pub fn json_query<'a, T>(
