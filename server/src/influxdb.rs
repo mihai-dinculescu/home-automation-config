@@ -1,6 +1,3 @@
-use dotenv::dotenv;
-use std::env;
-
 use influxdb::integrations::serde_integration::DatabaseQueryResult;
 use r2d2_influxdb::influxdb::Query;
 use r2d2_influxdb::r2d2;
@@ -15,22 +12,20 @@ fn init_pool(info: AuthInfo) -> Result<InfluxDbPool, r2d2::Error> {
     r2d2::Pool::builder().build(manager)
 }
 
-pub fn establish_connection() -> InfluxDbPool {
-    dotenv().ok();
-
-    let influxdb_host = env::var("INFLUXDB_HOST").expect("INFLUXDB_HOST must be set");
-    let influxdb_db = env::var("INFLUXDB_DB").expect("INFLUXDB_DB must be set");
-    let influxdb_username = env::var("INFLUXDB_USERNAME").expect("INFLUXDB_USERNAME must be set");
-    let influxdb_password = env::var("INFLUXDB_PASSWORD").expect("INFLUXDB_PASSWORD must be set");
-
+pub fn establish_connection(
+    url: &str,
+    database: &str,
+    username: &str,
+    password: &str,
+) -> InfluxDbPool {
     let info = AuthInfo {
-        url: influxdb_host.clone(),
-        database: influxdb_db,
-        username: influxdb_username,
-        password: influxdb_password,
+        url: url.to_owned(),
+        database: database.to_owned(),
+        username: username.to_owned(),
+        password: password.to_owned(),
     };
 
-    init_pool(info).unwrap_or_else(|_| panic!("Error connecting to {}", influxdb_host))
+    init_pool(info).unwrap_or_else(|_| panic!("Error connecting to {}", url))
 }
 
 pub fn json_query<'a, T>(

@@ -5,30 +5,33 @@ use actix_web::dev::ServiceResponse;
 use actix_web::{test, web, App};
 
 use diesel_migrations::{revert_latest_migration, run_pending_migrations};
-use dotenv::dotenv;
 
 use lib::db;
 use lib::handlers::graphql::graphql;
 use lib::influxdb;
-use lib::models::key::Key;
-use lib::schema_graphql::create_schema;
+use lib::{
+    config::{Config, ConfigEnvironmentEnum},
+    schema_graphql::create_schema,
+};
 
 pub async fn create_app(
 ) -> impl Service<Request = Request, Response = ServiceResponse, Error = Error> {
-    // load .env variables
-    dotenv().ok();
-
-    let key = std::env::var("API_KEY").expect("Missing `API_KEY` env variable");
-    let key = Key::new(key);
+    let config = Config::new(ConfigEnvironmentEnum::Test);
+    let key = config.key;
 
     // create Juniper schema
     let schema = std::sync::Arc::new(create_schema());
 
     // database connection pool
-    let db_pool = db::establish_connection(db::DatabaseKind::ConfigTest);
+    let db_pool = db::establish_connection(&config.postgres_db_url);
 
     // influxdb connection pool
-    let influxdb_pool = influxdb::establish_connection();
+    let influxdb_pool = influxdb::establish_connection(
+        &config.influxdb_host,
+        &config.influxdb_db,
+        &config.influxdb_username,
+        &config.influxdb_password,
+    );
 
     // get connection
     let connection = db_pool.get().unwrap();

@@ -8,6 +8,7 @@ extern crate r2d2_influxdb;
 pub mod db;
 pub mod influxdb;
 
+pub mod config;
 pub mod handlers;
 pub mod models;
 pub mod schema;

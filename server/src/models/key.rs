@@ -1,4 +1,4 @@
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Key {
     pub value: String,
 }

@@ -45,15 +45,21 @@ cargo test
 The following environment variables are required in an `.env` file:
 
 ```
+# general
 PORT=
+
+# postgres
 POSTGRES_DB=
-POSTGRES_DB_TEST=
 POSTGRES_USER=
 POSTGRES_PASSWORD=
+
+# influx
 INFLUXDB_HOST=
 INFLUXDB_DB=
 INFLUXDB_USERNAME=
 INFLUXDB_PASSWORD=
+
+# security
 API_KEY=
 ```
 
