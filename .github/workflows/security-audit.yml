@@ -24,6 +24,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/audit-check@v1
+      - name: Install cargo-audit binary crate
+        uses: actions-rs/install@v0.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          crate: cargo-audit
+          version: latest
+      - uses: davidB/rust-cargo-make@v1
+      - name: Run audit
+        run: cargo make audit

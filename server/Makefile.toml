@@ -17,6 +17,10 @@ args = ["clippy", "--all-targets", "--all-features", "--verbose", "--", "-D", "w
 command = "cargo"
 args = ["test", "--verbose"]
 
+[tasks.audit]
+command = "cargo"
+args = ["audit"]
+
 [tasks.ci-flow]
 dependencies = [
     "format",
