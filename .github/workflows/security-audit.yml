@@ -18,17 +18,19 @@ jobs:
   security_audit:
     name: Audit
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: server
 
     steps:
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: davidB/rust-cargo-make@v1
       - uses: actions/checkout@v2
       - name: Install cargo-audit binary crate
         uses: actions-rs/install@v0.1
         with:
           crate: cargo-audit
           version: latest
-      - uses: davidB/rust-cargo-make@v1
-      - name: Run audit
-        run: cargo make audit
+      - uses: actions-rs/audit-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
