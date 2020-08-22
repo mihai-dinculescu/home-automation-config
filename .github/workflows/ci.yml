@@ -31,6 +31,22 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      influxdb:
+        image: influxdb:latest
+        env:
+          INFLUXDB_DB: rooms
+          INFLUXDB_ADMIN_USER: influxdb_admin
+          INFLUXDB_ADMIN_PASSWORD: influxdb_password
+          INFLUXDB_HTTP_AUTH_ENABLED: true
+          INFLUXDB_DATA_QUERY_LOG_ENABLED: false
+        ports:
+          - 8086:8086
+        # Set health checks to wait until influxdb has started
+        options: >-
+          --health-cmd "curl -sI 127.0.0.1:8086/ping | grep -q \"204 No Content\""
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions-rs/toolchain@v1
@@ -47,6 +63,8 @@ jobs:
         run: cargo make clippy
       - name: Run test
         run: cargo make test
+        env:
+          INFLUXDB_HOST: http://localhost:8086
       - name: Generate code coverage
         run: cargo make coverage
       - name: Upload to codecov.io
