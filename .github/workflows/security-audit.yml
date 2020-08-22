@@ -20,12 +20,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-      - uses: davidB/rust-cargo-make@v1
       - uses: actions/checkout@v2
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly
+            override: true
+      - uses: davidB/rust-cargo-make@v1
       - name: Install cargo-audit binary crate
         uses: actions-rs/install@v0.1
         with:

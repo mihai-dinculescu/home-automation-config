@@ -46,12 +46,14 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-      - uses: davidB/rust-cargo-make@v1
       - uses: actions/checkout@v2
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly
+            override: true
+            components: rustfmt, clippy
+      - uses: davidB/rust-cargo-make@v1
       - name: Run format
         run: cargo make format
       - name: Run check
