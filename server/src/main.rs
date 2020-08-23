@@ -5,7 +5,10 @@ use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 use diesel_migrations::run_pending_migrations;
 
 use ::lib::db;
-use ::lib::handlers::graphql::{graphql, playground};
+use ::lib::handlers::{
+    graphql::{graphql, playground},
+    health::health,
+};
 use ::lib::influxdb;
 use ::lib::{
     config::{Config, ConfigEnvironmentEnum},
@@ -70,6 +73,7 @@ async fn main() -> io::Result<()> {
                     .route(web::post().to(graphql)),
             )
             .service(web::resource("/playground").route(web::get().to(playground)))
+            .service(web::resource("/health").route(web::get().to(health)))
             .default_service(web::route().to(|| {
                 HttpResponse::Found()
                     .header("location", "/playground")

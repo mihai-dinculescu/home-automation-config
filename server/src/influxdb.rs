@@ -19,10 +19,10 @@ pub fn establish_connection(
     password: &str,
 ) -> InfluxDbPool {
     let info = AuthInfo {
-        url: url.to_owned(),
-        database: database.to_owned(),
-        username: username.to_owned(),
-        password: password.to_owned(),
+        url: url.to_string(),
+        database: database.to_string(),
+        username: username.to_string(),
+        password: password.to_string(),
     };
 
     init_pool(info).unwrap_or_else(|_| panic!("Error connecting to {}", url))

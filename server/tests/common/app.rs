@@ -2,12 +2,15 @@ use actix_http::error::Error;
 use actix_http::Request;
 use actix_web::dev::Service;
 use actix_web::dev::ServiceResponse;
-use actix_web::{test, web, App};
+use actix_web::{test, web, App, HttpResponse};
 
 use diesel_migrations::{revert_latest_migration, run_pending_migrations};
 
 use lib::db;
-use lib::handlers::graphql::graphql;
+use lib::handlers::{
+    graphql::{graphql, playground},
+    health::health,
+};
 use lib::influxdb;
 use lib::{
     config::{Config, ConfigEnvironmentEnum},
@@ -55,7 +58,14 @@ pub async fn create_app(
                 web::resource("/graphql")
                     .route(web::get().to(graphql))
                     .route(web::post().to(graphql)),
-            ),
+            )
+            .service(web::resource("/playground").route(web::get().to(playground)))
+            .service(web::resource("/health").route(web::get().to(health)))
+            .default_service(web::route().to(|| {
+                HttpResponse::Found()
+                    .header("location", "/playground")
+                    .finish()
+            })),
     )
     .await
 }

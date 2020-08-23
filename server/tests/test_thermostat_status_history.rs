@@ -1,11 +1,9 @@
-#[macro_use]
-extern crate serial_test;
-
 mod common;
 
 #[cfg(test)]
 mod tests {
     use actix_web::test;
+    use serial_test::serial;
 
     use crate::common::app::create_app;
     use crate::common::helpers::set_thermostat_status;
