@@ -1,13 +1,15 @@
 use std::io;
 
 use actix_cors::Cors;
-use actix_web::{middleware, web, App, HttpResponse, HttpServer};
+use actix_web::middleware::{self, errhandlers::ErrorHandlers};
+use actix_web::{http, web, App, HttpResponse, HttpServer};
 use diesel_migrations::run_pending_migrations;
 
 use ::lib::db;
 use ::lib::handlers::{
+    error::error_handler,
     graphql::{graphql, playground},
-    health::health,
+    health::{health, health_devices},
 };
 use ::lib::influxdb;
 use ::lib::{
@@ -66,6 +68,7 @@ async fn main() -> io::Result<()> {
             .data(influxdb_pool.clone())
             .data(schema.clone())
             .data(key.clone())
+            .wrap(ErrorHandlers::new().handler(http::StatusCode::NOT_FOUND, error_handler))
             .wrap(middleware::Logger::default())
             .service(
                 web::resource("/graphql")
@@ -74,6 +77,7 @@ async fn main() -> io::Result<()> {
             )
             .service(web::resource("/playground").route(web::get().to(playground)))
             .service(web::resource("/health").route(web::get().to(health)))
+            .service(web::resource("/device-health/{device}").route(web::get().to(health_devices)))
             .default_service(web::route().to(|| {
                 HttpResponse::Found()
                     .header("location", "/playground")

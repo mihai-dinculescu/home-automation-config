@@ -1,6 +1,7 @@
 use juniper::{FieldResult, GraphQLInputObject, GraphQLObject};
 
 use crate::influxdb::{json_query, InfluxDbPooledConnection};
+use chrono::{DateTime, Utc};
 
 #[derive(GraphQLObject)]
 #[graphql(description = "The next command that should be executed by the thermostat")]
@@ -17,7 +18,7 @@ pub struct ThermostatCommandInput {
 
 #[derive(Deserialize, Debug, PartialEq, Clone)]
 struct Weather {
-    time: String,
+    time: DateTime<Utc>,
     apparent_temperature: f64,
 }
 
