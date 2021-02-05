@@ -13,7 +13,7 @@ use crate::models::key::Key;
 use crate::schema_graphql::{create_context, SchemaGraphQL};
 
 pub async fn playground() -> HttpResponse {
-    let html = playground_source("/graphql");
+    let html = playground_source("/graphql", None);
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(html)
@@ -35,34 +35,23 @@ pub async fn graphql(
         _ => data_body.unwrap().into_inner(),
     };
 
-    // let instrospection queries through
+    // let introspection queries through
     if data.operation_name() != Some("IntrospectionQuery") {
         // validate key for all other requests
         if let Err(e) = validate_key(&headers, key.get_ref()) {
             let err = GraphQLErrors::new(e);
 
-            return Ok(HttpResponse::Ok()
-                .content_type("application/json")
-                .body(serde_json::to_string(&err).unwrap()));
+            return Ok(HttpResponse::Ok().json(&err));
         }
     }
 
-    let body = web::block(move || {
-        let db_pool = db_pool.get().map_err(serde_json::error::Error::custom)?;
-        let influxdb_pool = influxdb_pool
-            .get()
-            .map_err(serde_json::error::Error::custom)?;
+    let db_pool = (*db_pool).clone();
+    let influxdb_pool = (*influxdb_pool).clone();
 
-        let ctx = create_context(db_pool, influxdb_pool);
-        let res = data.execute(&st, &ctx);
+    let ctx = create_context(db_pool, influxdb_pool);
+    let res = data.execute(&st, &ctx).await;
 
-        Ok::<_, serde_json::error::Error>(serde_json::to_string(&res)?)
-    })
-    .await?;
-
-    Ok(HttpResponse::Ok()
-        .content_type("application/json")
-        .body(body))
+    Ok(HttpResponse::Ok().json(res))
 }
 
 fn validate_key<'a>(headers: &'a HeaderMap, key: &'a Key) -> Result<(), &'a str> {

@@ -10,32 +10,32 @@ path = "src/lib.rs"
 
 [dependencies]
 # misc
-futures = "0.3.5"
+futures = "0.3.12"
 dotenv = "0.15.0"
-chrono = { version = "0.4.15", features = ["serde"] }
+chrono = { version = "0.4.19", features = ["serde"] }
 
 # web server
-actix-web = "2.0.0"
+actix-web = "3.3.2"
 actix-rt = "1.1.1"
-actix-cors = "0.2.0"
-env_logger = "0.7.1"
+actix-cors = "0.5.4"
+env_logger = "0.8.2"
 
 # postgres
 diesel = { version = "1.4.5", features = ["postgres", "r2d2", "chrono"] }
 diesel_migrations = "1.4.0"
 
 # influxdb
-influxdb = { version = "0.1.0", features = ["derive"] }
+influxdb = { version = "0.3.0", features = ["derive"] }
 r2d2 = "0.8.9"
 r2d2-influxdb = "0.1.0"
 
 # graphql
-juniper = "0.14.2"
-serde = {version = "1.0.115", features=["derive"] }
-serde_json = "1.0.57"
-anyhow = "1.0.32"
-thiserror = "1.0.20"
+juniper = "0.15.3"
+serde = {version = "1.0.123", features=["derive"] }
+serde_json = "1.0.61"
+anyhow = "1.0.38"
+thiserror = "1.0.23"
 
 [dev-dependencies]
-actix-http = "1.0.1"
+actix-http = "2.2.0"
 serial_test = "*"

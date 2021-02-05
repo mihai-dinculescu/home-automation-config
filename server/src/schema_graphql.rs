@@ -1,29 +1,28 @@
 use std::sync::Arc;
 
-use diesel::PgConnection;
-use juniper::FieldResult;
-use juniper::RootNode;
+use juniper::{graphql_object, RootNode};
+use juniper::{EmptySubscription, FieldResult};
 
-use crate::db::DbPooledConnection;
-use crate::influxdb::InfluxDbPooledConnection;
+use crate::db::DbPool;
+use crate::influxdb::InfluxDbPool;
 use crate::models::thermostat_command::{ThermostatCommand, ThermostatCommandInput};
 use crate::models::thermostat_status::{NewThermostatStatus, ThermostatStatus};
 
 #[derive(Clone)]
 pub struct Context {
-    pub db: Arc<DbPooledConnection>,
-    pub influxdb: Arc<InfluxDbPooledConnection>,
+    pub db_pool: Arc<DbPool>,
+    pub influxdb_pool: Arc<InfluxDbPool>,
 }
 
 impl juniper::Context for Context {}
 
 pub struct QueryRoot;
 
-#[juniper::object(Context = Context)]
+#[graphql_object(context = Context)]
 impl QueryRoot {
     #[graphql(description = "Query the current (latest) thermostat status")]
     fn thermostat_status(context: &Context) -> FieldResult<ThermostatStatus> {
-        let connection: &PgConnection = &context.db;
+        let connection = &context.db_pool.get()?;
 
         let result = ThermostatStatus::get_latest(connection)?;
         Ok(result)
@@ -31,7 +30,7 @@ impl QueryRoot {
 
     #[graphql(description = "Query the thermostat status history")]
     fn thermostat_status_history(context: &Context) -> FieldResult<Vec<ThermostatStatus>> {
-        let connection: &PgConnection = &context.db;
+        let connection = &context.db_pool.get()?;
 
         let results = ThermostatStatus::get_history(connection)?;
         Ok(results)
@@ -42,7 +41,7 @@ impl QueryRoot {
         context: &Context,
         data: ThermostatCommandInput,
     ) -> FieldResult<ThermostatCommand> {
-        let connection = &context.influxdb;
+        let connection = &context.influxdb_pool.get()?;
 
         let result = ThermostatCommand::get_next_command(connection, data)?;
         Ok(result)
@@ -51,14 +50,14 @@ impl QueryRoot {
 
 pub struct MutationRoot;
 
-#[juniper::object(Context = Context)]
+#[graphql_object(context = Context)]
 impl MutationRoot {
     #[graphql(description = "Set the thermostat status")]
     fn set_thermostat_status(
         context: &Context,
         data: NewThermostatStatus,
     ) -> FieldResult<ThermostatStatus> {
-        let connection: &PgConnection = &context.db;
+        let connection = &context.db_pool.get()?;
 
         ThermostatStatus::insert(connection, data)?;
 
@@ -67,15 +66,15 @@ impl MutationRoot {
     }
 }
 
-pub type SchemaGraphQL = RootNode<'static, QueryRoot, MutationRoot>;
+pub type SchemaGraphQL = RootNode<'static, QueryRoot, MutationRoot, EmptySubscription<Context>>;
 
 pub fn create_schema() -> SchemaGraphQL {
-    SchemaGraphQL::new(QueryRoot {}, MutationRoot {})
+    SchemaGraphQL::new(QueryRoot {}, MutationRoot {}, EmptySubscription::new())
 }
 
-pub fn create_context(db: DbPooledConnection, influxdb: InfluxDbPooledConnection) -> Context {
+pub fn create_context(db_pool: Arc<DbPool>, influxdb_pool: Arc<InfluxDbPool>) -> Context {
     Context {
-        db: Arc::new(db),
-        influxdb: Arc::new(influxdb),
+        db_pool,
+        influxdb_pool,
     }
 }

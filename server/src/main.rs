@@ -55,15 +55,19 @@ async fn main() -> io::Result<()> {
     run_pending_migrations(&connection)
         .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
 
-    println!(
-        "Starting GraphQL server at http://{}:{}",
-        &config.host, &config.port
-    );
+    let host = format!("{}:{}", &config.host, &config.port);
+    let http_host = format!("http://{}", &host);
+
+    println!("Starting GraphQL server at {}", &http_host);
 
     // start http server
     HttpServer::new(move || {
         App::new()
-            .wrap(Cors::new().finish()) // allow all requests
+            .wrap(
+                Cors::default()
+                    .allowed_origin(&http_host)
+                    .allowed_methods(vec!["GET", "POST"]),
+            )
             .data(db_pool.clone())
             .data(influxdb_pool.clone())
             .data(schema.clone())
@@ -84,7 +88,7 @@ async fn main() -> io::Result<()> {
                     .finish()
             }))
     })
-    .bind(format!("{}:{}", &config.host, &config.port))?
+    .bind(host)?
     .run()
     .await
 }
