@@ -35,7 +35,7 @@ pub fn json_query<'a, T>(
 where
     T: for<'de> Deserialize<'de> + std::marker::Send + Clone + 'static,
 {
-    let read_query = Query::raw_read_query(query);
+    let read_query = <dyn Query>::raw_read_query(query);
     let read_result = connection
         .query(&read_query)
         .map_err(|err| anyhow::anyhow!("Influx connection error: {}", err))?;

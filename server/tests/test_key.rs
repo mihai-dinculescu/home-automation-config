@@ -54,7 +54,7 @@ mod tests {
 
         assert!(status.is_object());
         assert_eq!(status["id"], 1);
-        assert_eq!(status["status"], false);
+        assert_eq!(status["status"].as_bool(), Some(false));
         assert!(status["timestamp"].is_number());
     }
 }

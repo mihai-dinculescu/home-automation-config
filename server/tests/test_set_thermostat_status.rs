@@ -23,7 +23,7 @@ mod tests {
 
         assert!(status.is_object());
         assert_eq!(status["id"], 2);
-        assert_eq!(status["status"], true);
+        assert_eq!(status["status"].as_bool(), Some(true));
         assert!(status["timestamp"].is_number());
     }
 
@@ -44,7 +44,7 @@ mod tests {
 
         assert!(status.is_object());
         assert_eq!(status["id"], 2);
-        assert_eq!(status["status"], true);
+        assert_eq!(status["status"].as_bool(), Some(true));
         assert!(status["timestamp"].is_number());
     }
 }
