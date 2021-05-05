@@ -20,6 +20,7 @@ services:
       - API_KEY=${API_KEY}
     ports:
       - ${PORT}:80
+    restart: always
     labels:
       - "docker.group=config"
   storage:
@@ -29,6 +30,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: always
     volumes:
       - storage-postgresql:/var/lib/postgresql/data
     labels:
