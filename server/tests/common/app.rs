@@ -34,7 +34,8 @@ pub async fn create_app(
         &config.influxdb_db,
         &config.influxdb_username,
         &config.influxdb_password,
-    );
+    )
+    .await;
 
     // get connection
     let connection = db_pool.get().unwrap();

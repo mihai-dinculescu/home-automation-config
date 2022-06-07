@@ -14,7 +14,7 @@ pub struct Config {
     pub influxdb_password: String,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq)]
 pub enum ConfigEnvironmentEnum {
     Production,
     Development,

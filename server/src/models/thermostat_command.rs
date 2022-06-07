@@ -1,6 +1,6 @@
 use juniper::{FieldResult, GraphQLInputObject, GraphQLObject};
 
-use crate::influxdb::{json_query, InfluxDbPooledConnection};
+use crate::influxdb::{json_query_tagged, InfluxDbPooledConnection};
 use chrono::{DateTime, Utc};
 
 #[derive(GraphQLObject)]
@@ -21,16 +21,20 @@ struct Weather {
     time: DateTime<Utc>,
     apparent_temperature: f64,
 }
+#[derive(Deserialize, Debug, PartialEq, Eq, Clone)]
+struct WeatherTags {
+    url: String,
+}
 
 impl ThermostatCommand {
-    pub fn get_next_command(
-        connection: &InfluxDbPooledConnection,
+    pub async fn get_next_command<'a>(
+        connection: &'a InfluxDbPooledConnection<'a>,
         _data: ThermostatCommandInput,
     ) -> FieldResult<ThermostatCommand> {
-        let result = json_query::<Weather>(
+        let result = json_query_tagged::<Weather, WeatherTags>(
             "SELECT apparentTemperature AS apparent_temperature FROM weather GROUP BY * ORDER BY DESC LIMIT 1",
-            &connection,
-        )?;
+            connection,
+        ).await?;
         let result = &result[0];
 
         Ok(ThermostatCommand {

@@ -1,18 +1,16 @@
-use influxdb::integrations::serde_integration::DatabaseQueryResult;
-use r2d2_influxdb::influxdb::Query;
-use r2d2_influxdb::r2d2;
-use r2d2_influxdb::{AuthInfo, InfluxDBConnectionManager};
+use crate::influxdb_pool::{AuthInfo, InfluxDBConnectionManager};
+use influxdb::{integrations::serde_integration::DatabaseQueryResult, Error, Query};
 use serde::Deserialize;
 
-pub type InfluxDbPool = r2d2::Pool<InfluxDBConnectionManager>;
-pub type InfluxDbPooledConnection = r2d2::PooledConnection<InfluxDBConnectionManager>;
+pub type InfluxDbPool = bb8::Pool<InfluxDBConnectionManager>;
+pub type InfluxDbPooledConnection<'a> = bb8::PooledConnection<'a, InfluxDBConnectionManager>;
 
-fn init_pool(info: AuthInfo) -> Result<InfluxDbPool, r2d2::Error> {
+async fn init_pool(info: AuthInfo) -> Result<InfluxDbPool, Error> {
     let manager = InfluxDBConnectionManager::new(info);
-    r2d2::Pool::builder().build(manager)
+    bb8::Pool::builder().build(manager).await
 }
 
-pub fn establish_connection(
+pub async fn establish_connection(
     url: &str,
     database: &str,
     username: &str,
@@ -25,26 +23,50 @@ pub fn establish_connection(
         password: password.to_string(),
     };
 
-    init_pool(info).unwrap_or_else(|_| panic!("Error connecting to {}", url))
+    init_pool(info)
+        .await
+        .unwrap_or_else(|_| panic!("Error connecting to {}", url))
 }
 
-pub fn json_query<'a, T>(
+pub async fn json_query<'a, DATA>(
     query: &'a str,
-    connection: &'a InfluxDbPooledConnection,
-) -> anyhow::Result<Vec<T>>
+    connection: &'a InfluxDbPooledConnection<'a>,
+) -> anyhow::Result<Vec<DATA>>
 where
-    T: for<'de> Deserialize<'de> + std::marker::Send + Clone + 'static,
+    DATA: for<'de> Deserialize<'de> + std::marker::Send + Clone + 'static,
 {
     let read_query = <dyn Query>::raw_read_query(query);
-    let read_result = connection
-        .query(&read_query)
-        .map_err(|err| anyhow::anyhow!("Influx connection error: {}", err))?;
+    let read_result = connection.query(&read_query).await?;
 
     let result = serde_json::from_slice::<DatabaseQueryResult>(read_result.as_bytes())
         .map_err(|err| anyhow::anyhow!("Influx query error: {}", err))
         .and_then(|mut db_result: DatabaseQueryResult| {
             db_result
-                .deserialize_next::<T>()
+                .deserialize_next::<DATA>()
+                .map_err(|err| anyhow::anyhow!("Influx deserialize error: {}", err))
+        });
+
+    let result = result?.series[0].values.clone();
+
+    Ok(result)
+}
+
+pub async fn json_query_tagged<'a, DATA, TAGS>(
+    query: &'a str,
+    connection: &'a InfluxDbPooledConnection<'a>,
+) -> anyhow::Result<Vec<DATA>>
+where
+    DATA: for<'de> Deserialize<'de> + std::marker::Send + Clone + 'static,
+    TAGS: for<'de> Deserialize<'de> + std::marker::Send + Clone + 'static,
+{
+    let read_query = <dyn Query>::raw_read_query(query);
+    let read_result = connection.query(&read_query).await?;
+
+    let result = serde_json::from_slice::<DatabaseQueryResult>(read_result.as_bytes())
+        .map_err(|err| anyhow::anyhow!("Influx query error: {}", err))
+        .and_then(|mut db_result: DatabaseQueryResult| {
+            db_result
+                .deserialize_next_tagged::<TAGS, DATA>()
                 .map_err(|err| anyhow::anyhow!("Influx deserialize error: {}", err))
         });
 

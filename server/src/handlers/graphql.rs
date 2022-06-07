@@ -38,15 +38,15 @@ pub async fn graphql(
     // let introspection queries through
     if data.operation_name() != Some("IntrospectionQuery") {
         // validate key for all other requests
-        if let Err(e) = validate_key(&headers, key.get_ref()) {
+        if let Err(e) = validate_key(headers, key.get_ref()) {
             let err = GraphQLErrors::new(e);
 
             return Ok(HttpResponse::Ok().json(&err));
         }
     }
 
-    let db_pool = (*db_pool).clone();
-    let influxdb_pool = (*influxdb_pool).clone();
+    let db_pool = db_pool.into_inner();
+    let influxdb_pool = influxdb_pool.into_inner();
 
     let ctx = create_context(db_pool, influxdb_pool);
     let res = data.execute(&st, &ctx).await;

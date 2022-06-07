@@ -27,7 +27,7 @@ fn get_env() -> ConfigEnvironmentEnum {
     ConfigEnvironmentEnum::Production
 }
 
-#[actix_rt::main]
+#[actix_web::main]
 async fn main() -> io::Result<()> {
     let config = Config::new(get_env());
     let key = config.key;
@@ -48,7 +48,8 @@ async fn main() -> io::Result<()> {
         &config.influxdb_db,
         &config.influxdb_username,
         &config.influxdb_password,
-    );
+    )
+    .await;
 
     // run pending postgres migrations
     let connection = db_pool.get().unwrap();

@@ -16,6 +16,7 @@ pub struct ThermostatStatus {
 #[derive(GraphQLInputObject, Insertable)]
 #[table_name = "thermostat_status"]
 #[graphql(description = "New thermostat status")]
+#[allow(clippy::extra_unused_lifetimes)]
 pub struct NewThermostatStatus {
     status: bool,
 }

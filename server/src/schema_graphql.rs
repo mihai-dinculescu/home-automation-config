@@ -37,13 +37,13 @@ impl QueryRoot {
     }
 
     #[graphql(description = "Get the next command that should be executed by the thermostat")]
-    fn thermostat_command(
+    async fn thermostat_command(
         context: &Context,
         data: ThermostatCommandInput,
     ) -> FieldResult<ThermostatCommand> {
-        let connection = &context.influxdb_pool.get()?;
+        let connection = &context.influxdb_pool.get().await?;
 
-        let result = ThermostatCommand::get_next_command(connection, data)?;
+        let result = ThermostatCommand::get_next_command(connection, data).await?;
         Ok(result)
     }
 }

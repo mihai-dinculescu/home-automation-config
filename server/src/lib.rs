@@ -3,10 +3,10 @@ extern crate dotenv;
 extern crate diesel;
 #[macro_use]
 extern crate serde;
-extern crate r2d2_influxdb;
 
 pub mod db;
 pub mod influxdb;
+pub mod influxdb_pool;
 
 pub mod config;
 pub mod handlers;

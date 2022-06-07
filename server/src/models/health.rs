@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct HealthStatus {
     pub version: String,
     pub api: String,
@@ -20,7 +20,7 @@ pub enum HealthStatusDeviceEnum {
     MasterBedroom,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct HealthStatusDevice {
     pub version: String,
     pub database_influx: String,

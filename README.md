@@ -5,7 +5,7 @@ Based on [rust-graphql-actix-juniper-diesel-example](https://github.com/mihai-di
 
 # Setup
 ## Rust & Cargo
-Install `rust` and `cargo` via `rustup` (https://rustup.rs/). The stable version is OK.
+Install `rust` and `cargo` via [rustup](https://rustup.rs). The stable version is OK.
 
 Optional: Cargo Watch (not required, but it speeds up development greatly)
 ```
@@ -68,4 +68,4 @@ docker volume create --name=home-automation-config-storage
 docker-compose up
 ```
 
-Open http://localhost:8080/playground.
+Open [http://localhost:8080/playground](http://localhost:8080/playground).
